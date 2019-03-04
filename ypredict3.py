@@ -12,11 +12,23 @@ from multiprocessing import Pool
 def get_args():
     parser = ArgumentParser(description = 'y haplogroup predict')
     parser.add_argument('-vcf','--vcf', help = 'input your vcffile' )
-    parser.add_argument('-r','--ref', help = 'update haplogroup tree', default = None )
     parser.add_argument('-m','--map', default = 'map.json')
     parser.add_argument('-s','--special', default = 'hfspecial.xlsx')
     args = parser.parse_args()
     return args
+
+class MyThread(threading.Thread):
+    def __init__(self,func,args=()):
+        super(MyThread,self).__init__()
+        self.func = func
+        self.args = args
+    def run(self):
+        self.result = self.func(*self.args)
+    def get_result(self):
+        try:
+            return self.result
+        except Exception:
+            return None
             
 def _reduce_method(m):
     if m.im_self is None:
@@ -152,39 +164,6 @@ class predict(object):
         df.to_csv('ystatistics.csv', header = True, index = True)
 
 
-
-"""#CHROM	POS	ID	REF	ALT	QUAL	FILTER	INFO	FORMAT	HAPLOGROUP
-chrY	2781653	.	G	T	.	.	G	.	B1"""
-    
-def hp(): 
-    haplogroup_dict = {}
-    assert os.path.exists(args.ref),'the ref_vcf.gz file does not exist, please check it'
-    with gzip.open(args.ref, 'r') as f:
-        for i in f:
-            if i.startswith('#'):
-                continue
-            else:
-                line = i.strip().split()
-                pos = line[1]
-                alt = line[4]
-                ref = line[3]
-                ancestral = line[7]
-                if alt == ancestral:
-                    effect = ref
-                else:
-                    effect = alt
-                haplogroup = line[9].split(' ')[0] 
-                haplogroup_dict[pos] = [haplogroup, effect]
-                
-    return haplogroup_dict
-
-
-def mapout(haplogroup_dict, name):
-    print (len(haplogroup_dict))
-    with open(name, 'w') as f:
-        json.dump(haplogroup_dict, f, ensure_ascii=False)
-        f.write('\n')
-
 def mapload(name):
     with open(name, 'r') as f:
         for line in f:
@@ -198,12 +177,8 @@ if __name__ == '__main__':
     args = get_args()
     assert os.path.exists(args.special), 'the hfspecial.xlsx file does not exist, please check it'
     special = pd.read_excel(args.special, header = 0, sheet_name = 'sheet') 
-    if args.ref:
-        haplogroup_dict = hp()
-        mapout(haplogroup_dict,'map.json')  
-    else:
-        haplogroup_dict = mapload(args.map)
-        predict(args.vcf, haplogroup_dict, special)._multiprocess()
+    haplogroup_dict = mapload(args.map)
+    predict(args.vcf, haplogroup_dict, special)._multiprocess()
 
 
             
