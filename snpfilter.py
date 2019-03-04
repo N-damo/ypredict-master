@@ -98,8 +98,39 @@ class snpfilter(object):
         subprocess.call("cat vcfhead vcf |bgzip >ref_vcf.gz", shell = True)
         subprocess.call('rm vcf', shell = True)
 
+def hp(): 
+    haplogroup_dict = {}
+    assert os.path.exists('ref_vcf.gz'),'the ref_vcf.gz file does not exist, please check it'
+    with gzip.open('ref_vcf.gz', 'r') as f:
+        for i in f:
+            if i.startswith('#'):
+                continue
+            else:
+                line = i.strip().split()
+                pos = line[1]
+                alt = line[4]
+                ref = line[3]
+                ancestral = line[7]
+                if alt == ancestral:
+                    effect = ref
+                else:
+                    effect = alt
+                haplogroup = line[9].split(' ')[0] 
+                haplogroup_dict[pos] = [haplogroup, effect]
+                
+    return haplogroup_dict
+
+
+def mapout(haplogroup_dict, name):
+    print (len(haplogroup_dict))
+    with open(name, 'w') as f:
+        json.dump(haplogroup_dict, f, ensure_ascii=False)
+        f.write('\n')
+
 if __name__ == '__main__':
     args = get_args()
     snp = args.snp
     f = snpfilter(snp)
     f.write_vcf()
+    haplogroup_dict = hp()
+    mapout(haplogroup_dict, 'map.json')
