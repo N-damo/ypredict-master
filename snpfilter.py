@@ -95,7 +95,7 @@ class snpfilter(object):
             f.write('##INFO=<ID=G,Number=1,Type=String,Description="Ancestral        Allele">')
             f.write('\n')
 
-        subprocess.call("cat vcfhead vcf |bgzip >ref_vcf.gz", shell = True)
+        subprocess.call("cat vcfhead vcf |vcf-sort|bgzip >ref_vcf.gz", shell = True)
         subprocess.call('rm vcf', shell = True)
 
 def hp(): 
