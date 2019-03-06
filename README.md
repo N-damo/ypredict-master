@@ -21,4 +21,6 @@ Y chromosome haplogroup can be predicted by ypredict.py. In the this step, the s
 
 `python ypredict.py -vcf y.vcf.gz -s hfspecial.xlsx -m map.json`
 
-If you need to update y haplogroup tree file downloaded from isogg, you can redo step1 and get an updated map.json.
+If you need to update y haplogroup tree file downloaded from isogg, you can redo step1 and get an updated map.json.  
+# Install  
+git clone https://github.com/N-damo/ypredict-master.git
