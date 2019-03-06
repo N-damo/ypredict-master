@@ -1,6 +1,10 @@
 # Ypredict   
 **Ypredict** is a python based software package that predicts y chromosome haplogroup. Here, I use calculate rank method to automatically find the most likely y haplogroup. For each y haplogroup, I give two mark (T or F) according their snp calling state. For Example, if the haplogroup O2a1a1a2a1 in isogg (<https://isogg.org/tree/>) haplogroup tree has six snps, then I calculate the number of true happening snp in the tested sample. For each haplogroup, I add all of the  rank along the routine from the 'Y' haplogroup to this haplogroup(rank = n_T + ((n_T**2)/(n_T + n_F))). After that, the max rank and 'T' mark of the haplogroup will be the most likely haplogroup. 
 * The current version is 0.0.1  
+  
+# Dependence  
+* vcftools(<http://vcftools.sourceforge.net/>)
+* biopython(<https://biopython.org/wiki/Download>)
 
 # Getting Started
 ***
