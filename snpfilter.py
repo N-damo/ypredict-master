@@ -25,9 +25,7 @@ class snpfilter(object):
         df.columns = ['name','haplogroup','other_name','rs','b37','b38','mutation']
         df = df[['haplogroup','b38','mutation']]
         s = df[df['mutation'].str.len() == 4]
-        #不保留重复值
         uniq = s.drop_duplicates(subset = "b38",keep = False)
-        #提取所有重复值
         dup = s[s["b38"].duplicated(keep = False)]
         dup = dup.sort_values(by=['b38','mutation'])
         result = dup.drop_duplicates(subset = ['b38','mutation'],keep = False)
@@ -52,9 +50,7 @@ class snpfilter(object):
 
     def write_vcf(self):
         self.writed_bed()
-        cmd = "bedtools getfasta -fi /share/data1/genome/hs38DH.fa -bed y.bed -fo sequence.fasta"
-        subprocess.call(cmd, shell = True)
-        seq = SeqIO.read('sequence.fasta','fasta')
+        seq = SeqIO.read('Y.fasta', 'fasta')
         result = []
         position = self.filter['b38']
         for i in position:
@@ -76,7 +72,6 @@ class snpfilter(object):
         vcf.insert(6,'FILTER','.')
         vcf.insert(8,'FORMAT','.')
         ref_vcf = vcf[['#CHROM', 'POS', 'ID', 'REF', 'ALT', 'QUAL', 'FILTER', 'INFO', 'FORMAT', 'HAPLOGROUP']]
-        ref_vcf = ref_vcf.sort_values(by = 'POS')
         ref_vcf.to_csv('vcf', header = True, index = False, sep = '\t')
         
         with open('vcfhead', "w") as f:

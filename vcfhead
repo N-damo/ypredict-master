@@ -1,0 +1,7 @@
+##fileformat=VCFv4.2
+##reference=hg38
+##contig=<ID=chrY,length=57227415,assembly=B38,species="Homo    sapiens">
+##INFO=<ID=A,Number=1,Type=String,Description="Ancestral        Allele">
+##INFO=<ID=T,Number=1,Type=String,Description="Ancestral        Allele">
+##INFO=<ID=C,Number=1,Type=String,Description="Ancestral        Allele">
+##INFO=<ID=G,Number=1,Type=String,Description="Ancestral        Allele">
