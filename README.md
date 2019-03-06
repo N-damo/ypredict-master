@@ -5,6 +5,7 @@
 # Dependence  
 * vcftools(<http://vcftools.sourceforge.net/>)
 * biopython(<https://biopython.org/wiki/Download>)
+* GATK(<https://software.broadinstitute.org/gatk/download/>)
 
 # Getting Started
 ***
