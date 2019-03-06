@@ -44,12 +44,8 @@ class snpfilter(object):
         filter.to_csv('filter.csv',index=False, header = True)
         return filter
 
-    def writed_bed(self):
-        with open('y.bed', 'w') as f:
-            f.write('chrY\t0\t57227415')
 
     def write_vcf(self):
-        self.writed_bed()
         seq = SeqIO.read('Y.fasta', 'fasta')
         result = []
         position = self.filter['b38']
