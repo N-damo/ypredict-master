@@ -5,7 +5,7 @@ import json
 import types
 import copy_reg
 import gzip
-import os,sys,time
+import os
 from argparse import ArgumentParser
 from multiprocessing import Pool
 
@@ -33,6 +33,7 @@ class predict(object):
         self.genotype = self.simple()
         self.name = self.genotype.keys()
         self.special = special
+        self.result = self._multiprocess()
 
 
     def parse_vcf(self):
@@ -167,7 +168,7 @@ if __name__ == '__main__':
     assert os.path.exists(args.special), 'the hfspecial.xlsx file does not exist, please check it'
     special = pd.read_excel(args.special, header = 0, sheet_name = 'sheet') 
     haplogroup_dict = mapload(args.map)
-    predict(args.vcf, haplogroup_dict, special)._multiprocess()
+    predict(args.vcf, haplogroup_dict, special)
 
 
             
