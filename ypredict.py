@@ -128,10 +128,11 @@ class predict(object):
                     else:
                         n_f += 1           
                     haplogroup = parent
-                result[ori] = n_t + ((n_t**2.0)/(n_t + n_f))
-        rank = result[max(result, key = result.get)]
-        target = max(result, key = result.get)
-        return target, rank, result
+                s1 = ((n_t**2.0)/(n_t + n_f))
+                result[ori] = [s1, n_t]       
+        target_haplogroup = max(result, key = result.get)
+        rank = result[target_haplogroup][0]
+        return target_haplogroup, rank, result
 
     def _multiprocess(self):
         pool = Pool(10)
