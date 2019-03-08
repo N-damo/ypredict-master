@@ -3,7 +3,7 @@ import pandas as pd
 from Bio.Seq import Seq
 from Bio import SeqIO
 import subprocess
-import argparse
+import argparse, os, gzip, json
 from argparse import ArgumentParser
 
 def get_args():
@@ -28,7 +28,7 @@ class snpfilter(object):
         uniq = s.drop_duplicates(subset = "b38",keep = False)
         dup = s[s["b38"].duplicated(keep = False)]
         dup = dup.sort_values(by=['b38','mutation'])
-        result = dup.drop_duplicates(subset = ['b38','mutation'],keep = False)
+        result = dup.drop_duplicates(subset = ['b38','mutation', 'haplogroup'],keep = False)
         r = result.drop_duplicates(subset = 'b38',keep = 'first')
         r = r['b38']
         f = dup[~dup['b38'].isin(r.values)]
@@ -56,7 +56,6 @@ class snpfilter(object):
         vcf = pd.merge(result, self.filter, on = 'b38')
         vcf1 = vcf[vcf['REF'] == vcf['ancestral']]
         vcf1.columns = ['POS', 'REF', 'HAPLOGROUP', 'INFO', 'ALT']
-        print len(vcf1)
         vcf2 = vcf[vcf['REF'] == vcf['descendant']]
         vcf2 = vcf2.drop('descendant', axis = 1)
         vcf2.insert(4,'ALT', vcf2['ancestral'])
@@ -68,6 +67,8 @@ class snpfilter(object):
         vcf.insert(6,'FILTER','.')
         vcf.insert(8,'FORMAT','.')
         ref_vcf = vcf[['#CHROM', 'POS', 'ID', 'REF', 'ALT', 'QUAL', 'FILTER', 'INFO', 'FORMAT', 'HAPLOGROUP']]
+        ref_vcf['POS'] = ref_vcf['POS'].astype(int)
+        ref_vcf = ref_vcf.sort_values('POS')
         ref_vcf.to_csv('vcf', header = True, index = False, sep = '\t')
         
         with open('vcfhead', "w") as f:
@@ -86,7 +87,7 @@ class snpfilter(object):
             f.write('##INFO=<ID=G,Number=1,Type=String,Description="Ancestral        Allele">')
             f.write('\n')
 
-        subprocess.call("cat vcfhead vcf |vcf-sort|bgzip >ref_vcf.gz", shell = True)
+        subprocess.call("cat vcfhead vcf |bgzip >ref_vcf.gz", shell = True)
         subprocess.call('rm vcf', shell = True)
 
 def hp(): 
@@ -113,7 +114,6 @@ def hp():
 
 
 def mapout(haplogroup_dict, name):
-    print (len(haplogroup_dict))
     with open(name, 'w') as f:
         json.dump(haplogroup_dict, f, ensure_ascii=False)
         f.write('\n')
