@@ -3,7 +3,6 @@
 * The current version is 0.0.1  
   
 # Dependence  
-* vcftools(<http://vcftools.sourceforge.net/>)
 * biopython(<https://biopython.org/wiki/Download>)
 * GATK(<https://software.broadinstitute.org/gatk/download/>)
 
