@@ -33,7 +33,7 @@ class predict(object):
         self.genotype = self.simple()
         self.name = self.genotype.keys()
         self.special = special
-        self.result = self._multiprocess()
+        self._multiprocess()
 
 
     def parse_vcf(self):
