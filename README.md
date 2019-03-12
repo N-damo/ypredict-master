@@ -29,4 +29,5 @@ If you need to update y haplogroup tree file downloaded from isogg, you can redo
 # Install  
 `git clone https://github.com/N-damo/ypredict-master.git`  
 
-`python setup.py install`
+`python setup.py install`  
+or `pip install ypredict`

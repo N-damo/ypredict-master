@@ -1,0 +1,17 @@
+MANIFEST.in
+README.md
+setup.py
+Ypredict.egg-info/PKG-INFO
+Ypredict.egg-info/SOURCES.txt
+Ypredict.egg-info/dependency_links.txt
+Ypredict.egg-info/requires.txt
+Ypredict.egg-info/top_level.txt
+bin/snpfilter.py
+bin/ypredict.py
+test/Y.fasta
+test/filter.csv
+test/hfspecial.xlsx
+test/map.json
+test/ref_vcf.gz
+test/snp14.3.csv
+test/vcfhead
