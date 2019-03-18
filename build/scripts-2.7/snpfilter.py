@@ -10,6 +10,7 @@ from argparse import ArgumentParser
 def get_args():
     parser = ArgumentParser(description = 'filter snp')
     parser.add_argument('-snp', '--snp', help = 'input snp file')
+    parser.add_argument('-y', '--y', help = 'input Y fasta')
     args = parser.parse_args()
     return args
 
@@ -47,7 +48,7 @@ class snpfilter(object):
 
 
     def write_vcf(self):
-        seq = SeqIO.read('Y.fasta', 'fasta')
+        seq = SeqIO.read(args.y, 'fasta')
         result = []
         position = self.filter['b38']
         for i in position:
