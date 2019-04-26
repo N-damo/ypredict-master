@@ -6,17 +6,46 @@ import types
 import copy_reg
 import gzip
 import os
+import argparse
 from argparse import ArgumentParser
 from multiprocessing import Pool
 
 
 def get_args():
+    _logo = """
+  
+ _____                             _  ______ _       _            _                 _                    
+|  __ \                           (_) | ___ (_)     | |          | |               | |                   
+| |  \/_   _  ___  _ __ ___   __ _ _  | |_/ /_  ___ | |_ ___  ___| |__  _ __   ___ | | ___   __ _ _   _  
+| | __| | | |/ _ \| '_ ` _ \ / _` | | | ___ | |/ _ \| __/ _ \/ __| '_ \| '_ \ / _ \| |/ _ \ / _` | | | | 
+| |_\ | |_| | (_) | | | | | | (_| | | | |_/ | | (_) | ||  __| (__| | | | | | | (_) | | (_) | (_| | |_| | 
+ \____/\__,_|\___/|_| |_| |_|\__,_|_| \____/|_|\___/ \__\___|\___|_| |_|_| |_|\___/|_|\___/ \__, |\__, | 
+                                                                                             __/ | __/ | 
+                                                                                            |___/ |___/  
+
+"""
+    print _logo
     parser = ArgumentParser(description='y haplogroup predict')
-    parser.add_argument('-vcf', '--vcf', help='input your vcffile')
-    parser.add_argument('-m', '--map', default='map.json')
-    parser.add_argument('-s', '--special', default='hfspecial.xlsx')
+    req = parser.add_argument_group('required arguments')
+    req.add_argument('-vcf', '--vcf', help='input your vcffile',
+                     required=True, type=extant_file, metavar='VCF')
+    req.add_argument('-m', '--map', default='map.json',
+                     required=True, type=extant_file, metavar='MAP')
+    req.add_argument('-s', '--special', default='hfspecial.xlsx',
+                     required=True, type=extant_file, metavar='.XLSX')
     args = parser.parse_args()
     return args
+
+
+def extant_file(x):
+    """
+    'Type' for argparse - checks that file exists but does not open.
+    """
+    if not os.path.exists(x):
+        # Argparse uses the ArgumentTypeError to give a rejection message like:
+        # error: argument input: x does not exist
+        raise argparse.ArgumentTypeError("{0} does not exist".format(x))
+    return x
 
 
 def _reduce_method(m):
@@ -24,9 +53,6 @@ def _reduce_method(m):
         return getattr, (m.im_class, m.im_func.func_name)
     else:
         return getattr, (m.im_self, m.im_func.func_name)
-
-
-copy_reg.pickle(types.MethodType, _reduce_method)
 
 
 class predict(object):
@@ -40,8 +66,6 @@ class predict(object):
         self._multiprocess()
 
     def parse_vcf(self):
-        assert os.path.exists(
-            self.vcffile), 'the vcf file does not exist in the provided path, please check it'
         with gzip.open(self.vcffile, 'r') as f:
             genotype = defaultdict(list)
             genotype2 = defaultdict(int)
@@ -176,8 +200,7 @@ def mapload(name):
 
 if __name__ == '__main__':
     args = get_args()
-    assert os.path.exists(
-        args.special), 'the hfspecial.xlsx file does not exist, please check it'
+    copy_reg.pickle(types.MethodType, _reduce_method)
     special = pd.read_excel(args.special, header=0, sheet_name='sheet')
     haplogroup_dict = mapload(args.map)
     predict(args.vcf, haplogroup_dict, special)
