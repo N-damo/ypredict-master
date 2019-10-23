@@ -1,4 +1,4 @@
-#!/usr/bin/env python
+#!/usr/bin/env python3
 #coding: utf-8
 import pandas as pd
 from Bio.Seq import Seq
@@ -6,6 +6,7 @@ from Bio import SeqIO
 import subprocess
 import argparse, os, gzip, json
 from argparse import ArgumentParser
+
 
 def get_args():
     parser = ArgumentParser(description = 'filter snp')
@@ -95,7 +96,7 @@ class snpfilter(object):
 def hp(): 
     haplogroup_dict = {}
     assert os.path.exists('ref_vcf.gz'),'the ref_vcf.gz file does not exist, please check it'
-    with gzip.open('ref_vcf.gz', 'r') as f:
+    with gzip.open('ref_vcf.gz', 'rt') as f:
         for i in f:
             if i.startswith('#'):
                 continue
@@ -110,6 +111,7 @@ def hp():
                 else:
                     effect = alt
                 haplogroup = line[9].split(' ')[0] 
+                print(haplogroup)
                 haplogroup_dict[pos] = [haplogroup, effect]
                 
     return haplogroup_dict

@@ -15,3 +15,5 @@ test/map.json
 test/ref_vcf.gz
 test/snp14.3.csv
 test/vcfhead
+test/ypredict.txt
+test/ystatistics.csv

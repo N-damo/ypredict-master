@@ -1,14 +1,14 @@
-#!/usr/bin/env python
+#!/usr/bin/env python3
 import pandas as pd
 from collections import defaultdict
 import json
-import types
-import copy_reg
+#import types
+#import copy_reg
 import gzip
 import os
 import argparse
 from argparse import ArgumentParser
-from multiprocessing import Pool
+#from multiprocessing import Pool
 
 
 def get_args():
@@ -24,7 +24,7 @@ def get_args():
                                                                                             |___/ |___/  
 
 """
-    print _logo
+    print(_logo)
     parser = ArgumentParser(description='y haplogroup predict')
     req = parser.add_argument_group('required arguments')
     req.add_argument('-vcf', '--vcf', help='input your vcffile',
@@ -33,6 +33,8 @@ def get_args():
                      required=True, type=extant_file, metavar='MAP')
     req.add_argument('-s', '--special', default='hfspecial.xlsx',
                      required=True, type=extant_file, metavar='.XLSX')
+    req.add_argument('-p', '--prefix', default='output prefix',
+                     required=True)
     args = parser.parse_args()
     return args
 
@@ -48,31 +50,32 @@ def extant_file(x):
     return x
 
 
-def _reduce_method(m):
-    if m.im_self is None:
-        return getattr, (m.im_class, m.im_func.func_name)
-    else:
-        return getattr, (m.im_self, m.im_func.func_name)
+# def _reduce_method(m):
+#     if m.im_self is None:
+#         return getattr, (m.im_class, m.im_func.func_name)
+#     else:
+#         return getattr, (m.im_self, m.im_func.func_name)
 
 
 class predict(object):
 
-    def __init__(self, vcffile, haplogroup_dict, special):
+    def __init__(self, vcffile, haplogroup_dict, special,prefix):
         self.vcffile = vcffile
         self.haplogroup_dict = haplogroup_dict
+        self.prefix=prefix
         self.genotype = self.simple()
         self.name = self.genotype.keys()
         self.special = special
-        self._multiprocess()
+        self._multisample()
 
     def parse_vcf(self):
-        with gzip.open(self.vcffile, 'r') as f:
+        with gzip.open(self.vcffile, 'rt') as f:
             genotype = defaultdict(list)
             genotype2 = defaultdict(int)
             for line in f:
-                if line.startswith(b'##'):
+                if line.startswith('##'):
                     continue
-                elif line.startswith(b'#CHROM'):
+                elif line.startswith('#CHROM'):
                     vcf = line.strip().split()
                     n = len(vcf[9:])
                 else:
@@ -111,6 +114,7 @@ class predict(object):
 
         return genotype
 
+
     def simple(self):
         genotype = self.parse_vcf()
         genotype2 = {}
@@ -135,6 +139,7 @@ class predict(object):
 
         return genotype2
 
+
     def get_parent(self, haplogroup):
         if haplogroup in list(self.special['haplogroup']):
             parent = self.special[self.special['haplogroup']
@@ -144,6 +149,7 @@ class predict(object):
         else:
             parent = haplogroup[:-1]
         return parent
+
 
     def get_score(self, sample):
         result = {}
@@ -167,27 +173,44 @@ class predict(object):
                 result[ori] = [s1, n_t]
         target_haplogroup = max(result, key=result.get)
         rank = result[target_haplogroup][0]
+        print(sample, target_haplogroup, rank)
         return target_haplogroup, rank, result
 
-    def _multiprocess(self):
-        pool = Pool(10)
+    def _multisample(self):
         resultList = {}
         for sample in self.name:
-            resultList[sample] = pool.apply_async(
-                self.get_score, args=(sample,))
-        pool.close()
-        pool.join()
+            resultList[sample] = self.get_score(sample)
         results = {}
-        with open('ypredict.txt', 'w') as f:
+        with open(self.prefix, 'wt') as f:
             for sample in resultList:
-                target_haplogroup, rank, result = resultList[sample].get()
+                target_haplogroup, rank, result = resultList[sample]
                 results[sample] = result
                 f.write(
                     '\t'.join([sample, target_haplogroup, str(rank)]) + '\n')
-                print sample, target_haplogroup, rank
+                print(sample, target_haplogroup, rank)
 
-        df = pd.DataFrame.from_dict(results, orient='index').T
-        df.to_csv('ystatistics.csv', header=True, index=True)
+        #df = pd.DataFrame.from_dict(results, orient='index').T
+        #df.to_csv('ystatistics.csv', header=True, index=True)
+
+    # def _multiprocess(self):
+    #     pool = Pool(10)
+    #     resultList = {}
+    #     for sample in self.name:
+    #         resultList[sample] = pool.apply_async(
+    #             self.get_score, args=(sample,))
+    #     pool.close()
+    #     pool.join()
+    #     results = {}
+    #     with open('ypredict.txt', 'w') as f:
+    #         for sample in resultList:
+    #             target_haplogroup, rank, result = resultList[sample].get()
+    #             results[sample] = result
+    #             f.write(
+    #                 '\t'.join([sample, target_haplogroup, str(rank)]) + '\n')
+    #             print(sample, target_haplogroup, rank)
+
+    #     df = pd.DataFrame.from_dict(results, orient='index').T
+    #     df.to_csv('ystatistics.csv', header=True, index=True)
 
 
 def mapload(name):
@@ -200,7 +223,7 @@ def mapload(name):
 
 if __name__ == '__main__':
     args = get_args()
-    copy_reg.pickle(types.MethodType, _reduce_method)
+    #copy_reg.pickle(types.MethodType, _reduce_method)
     special = pd.read_excel(args.special, header=0, sheet_name='sheet')
     haplogroup_dict = mapload(args.map)
-    predict(args.vcf, haplogroup_dict, special)
+    predict(args.vcf, haplogroup_dict, special,args.prefix)
